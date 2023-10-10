@@ -10,6 +10,18 @@ function displayTime() {
   timeDisplayEl.text(rightNow);
 }
 
+
+
+console.log($(":button").on(
+  "click", function() {
+    var parentId = $(this).parent().attr('id')
+    console.log(parentId);
+    var value = $(this).siblings('.description').val()
+    console.log(value)
+    localStorage.setItem(parentId,value)
+  }
+))
+
 function readEventsFromStorage() {
   var events = localStorage.getItem('events');
   if (events) {
@@ -62,6 +74,7 @@ $(function () {
 
   var now = dayjs();
 
+  // Code from chatgpt
   $('.time-block').each(function() {
 var blockHour = parseInt($(this).attr('id').split('-')[1]);
 if (blockHour < now.hour()) {
