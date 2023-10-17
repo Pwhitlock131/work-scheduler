@@ -1,27 +1,27 @@
- var timeDisplayEl = $('#time-display');
- var eventDisplayEl = $('#event-display');
- var eventInputEl = $('#event-input');
- var saveBttn = $('#save')
- // Wrap all code that interacts with the DOM in a call to jQuery to ensure that
-// the code isn't run until the browser has finished rendering all the elements
-// in the html.
+var timeDisplayEl = $('#time-display');
+var eventDisplayEl = $('#event-display');
+var eventInputEl = $('#event-input');
+var saveBttn = $('#save')
+
+//defines a function to display current time and date using the dayjs library, updates elements using id: time-display.
 function displayTime() {
   var rightNow = dayjs().format('MMM DD, YYYY [at] hh:mm:ss a');
   timeDisplayEl.text(rightNow);
 }
 
 
-
-console.log($(":button").on(
-  "click", function() {
+//sets up a click event handler for all bttns and logs the parent ID and the value to the console when a bttn is clicked. Done for tutoring 
+console.log($(':button').on(
+  "click", function () {
     var parentId = $(this).parent().attr('id')
     console.log(parentId);
     var value = $(this).siblings('.description').val()
     console.log(value)
-    localStorage.setItem(parentId,value)
+    localStorage.setItem(parentId, value)
   }
 ))
 
+//reads events in local storage
 function readEventsFromStorage() {
   var events = localStorage.getItem('events');
   if (events) {
@@ -32,22 +32,12 @@ function readEventsFromStorage() {
   return events;
 }
 
+//saves events to local storage
 function saveEventsToStorage(events) {
   localStorage.setItem('events', JSON.stringify(events));
 }
 
-function printEventData() {
-  eventDisplayEl.empty();
-
-  var events = readEventsFromStorage();
-
-  for (var i = 0; i < events.length; i += 1) {
-    var event = events[i];
-    var eventDate = dayjs(event.date);
-    var today = dayjs().startOf('day');
-  }
-}
-
+//handles form submission, stores event data in local storage and updates textarea
 function handleEventFormSubmit(event) {
   event.preventDefault();
 
@@ -60,35 +50,53 @@ function handleEventFormSubmit(event) {
   events.push(newEvent);
   saveEventsToStorage(events);
 
-  printEventData();
-}
+  eventInputEl.siblings('.description').val(newEvent.description);
 
+  displaySavedEvents();
+}
+//adds a click event listener to the save bttn which triggers handleEventFormSubmit on click
 saveBttn.on('click', handleEventFormSubmit);
 
+function displaySavedEvents() {
+  var events = readEventsFromStorage();
+
+  eventDisplayEl.empty();
+
+  events.forEach(function(event) {
+    var eventItem = $('<div>');
+    eventItem.text(event.description);
+    eventDisplayEl.append(eventItem);
+  });
+
+  $(document).ready(function() {
+    displaySavedEvents();
+  });
+}
 
 
 
-
-
+//sets up the page, reads events from local storage and changes the css according to current time
 $(function () {
+
+  var events = readEventsFromStorage();
 
   var now = dayjs();
 
-  // Code from chatgpt
-  $('.time-block').each(function() {
-var blockHour = parseInt($(this).attr('id').split('-')[1]);
-if (blockHour < now.hour()) {
-  $(this).addClass('past').removeClass('present future');
-} else if (blockHour === now.hour()) {
-  $(this).addClass('present').removeClass('past future');
-} else {
-  $(this).addClass('future').removeClass('past present');
-}
+
+  $('.time-block').each(function () {
+    var blockHour = parseInt($(this).attr('id').split('-')[1]);
+    if (blockHour < now.hour()) {
+      $(this).addClass('past').removeClass('present future');
+    } else if (blockHour === now.hour()) {
+      $(this).addClass('present').removeClass('past future');
+    } else {
+      $(this).addClass('future').removeClass('past present');
+    }
   });
 
   $('.description').each(function () {
     var blockId = $(this).closest('.time-block').attr('id');
-    var savedEvent = events.find(function(event) {
+    var savedEvent = events.find(function (event) {
       return event.date === blockId;
     });
     if (savedEvent) {
@@ -96,24 +104,9 @@ if (blockHour < now.hour()) {
     }
   });
 
-  });
-  
-  displayTime();
-  setInterval(displayTime, 1000);
+});
 
-    // TODO: Add a listener for click events on the save button. This code should
-    // use the id in the containing time-block as a key to save the user input in
-    // local storage. HINT: What does `this` reference in the click listener
-    // function? How can DOM traversal be used to get the "hour-x" id of the
-    // time-block containing the button that was clicked? How might the id be
-    // useful when saving the description in local storage?
-    //
-    // TODO: Add code to apply the past, present, or future class to each time
-    // block by comparing the id to the current hour. HINTS: How can the id
-    // attribute of each time-block be used to conditionally add or remove the
-    // past, present, and future classes? How can Day.js be used to get the
-    // current hour in 24-hour time?
-    //
-    // TODO: Add code to get any user input that was saved in localStorage and set
-    // the values of the corresponding textarea elements. HINT: How can the id
-    // attribute of each time-block be used to do this?
+//calls displayTime function to display current time and date
+displayTime();
+//updates timer display every second by calling the displayTime function repeatedly
+setInterval(displayTime, 1000);
